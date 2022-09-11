@@ -447,6 +447,9 @@
             <partyRepItem classPath="C:\Users\space\eclipse-workspace\masi\out\production\masi\Rahul.class" strategyParameters="">
                 <properties/>
             </partyRepItem>
+            <partyRepItem classPath="C:\Users\space\eclipse-workspace\masi\out\production\masi\askBest.class" strategyParameters="">
+                <properties/>
+            </partyRepItem>
         </partyRepItems>
         <domainRepItem/>
         <protocolRepItem/>

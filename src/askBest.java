@@ -11,33 +11,29 @@ import genius.core.parties.NegotiationInfo;
 /**
  * This is your negotiation party.
  */
-public class Groupn extends AbstractNegotiationParty {
+public class askBest extends AbstractNegotiationParty {
 
 	private Bid lastReceivedBid = null;
 
 	@Override
 	public void init(NegotiationInfo info) {
-
 		super.init(info);
-
 		System.out.println("Discount Factor is " + getUtilitySpace().getDiscountFactor());
 		System.out.println("Reservation Value is " + getUtilitySpace().getReservationValueUndiscounted());
-
-		// if you need to initialize some variables, please initialize them
-		// below
-
 	}
 
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> validActions) {
-
-		// with 50% chance, counter offer
-		// if we are the first party, also offer.
-		if (lastReceivedBid == null || !validActions.contains(Accept.class) || Math.random() > 0.5) {
-			return new Offer(getPartyId(), generateRandomBid());
-		} else {
-			return new Accept(getPartyId(), lastReceivedBid);
+		Bid maxBid = null;
+		try {
+			maxBid = utilitySpace.getMaxUtilityBid();
+			if (lastReceivedBid != null && lastReceivedBid.equals(maxBid)) {
+				return new Accept(getPartyId(), lastReceivedBid);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return new Offer(getPartyId(), maxBid);
 	}
 
 	@Override
@@ -50,7 +46,7 @@ public class Groupn extends AbstractNegotiationParty {
 
 	@Override
 	public String getDescription() {
-		return "example party group N";
+		return "Only accepts best utility!";
 	}
 
 }
