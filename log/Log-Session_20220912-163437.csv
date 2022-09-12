@@ -1,0 +1,3 @@
+1,1,0.01639344262295082,askBest@2,(Offer  bid:Bid[Place: Tokyo, Budget: 900, Days: 3, Purpose: Sightseeing])
+1,2,0.01639344262295082,SimpleAgent@3,(Accept  bid:Bid[Place: Tokyo, Budget: 900, Days: 3, Purpose: Sightseeing])
+agreement,Bid[Place: Tokyo, Budget: 900, Days: 3, Purpose: Sightseeing],1.0,0.555

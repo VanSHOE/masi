@@ -1,0 +1,6 @@
+1,1,0.01639344262295082,SimpleAgent@0,(Offer  bid:Bid[Food: Finger-Food, Drinks: Beer Only, Location: Ballroom, Invitations: Custom, Handmade, Music: MP3, Cleanup: Hired Help])
+1,2,0.01639344262295082,askBest@1,(Offer  bid:Bid[Food: Chips and Nuts, Drinks: Non-Alcoholic, Location: Party Room, Invitations: Plain, Music: DJ, Cleanup: Special Equiment])
+2,1,0.03278688524590164,SimpleAgent@0,(Offer  bid:Bid[Food: Chips and Nuts, Drinks: Beer Only, Location: Your Dorm, Invitations: Photo, Music: MP3, Cleanup: Special Equiment])
+2,2,0.03278688524590164,askBest@1,(Offer  bid:Bid[Food: Chips and Nuts, Drinks: Non-Alcoholic, Location: Party Room, Invitations: Plain, Music: DJ, Cleanup: Special Equiment])
+3,1,0.04918032786885246,SimpleAgent@0,(Accept  bid:Bid[Food: Chips and Nuts, Drinks: Non-Alcoholic, Location: Party Room, Invitations: Plain, Music: DJ, Cleanup: Special Equiment])
+agreement,Bid[Food: Chips and Nuts, Drinks: Non-Alcoholic, Location: Party Room, Invitations: Plain, Music: DJ, Cleanup: Special Equiment],0.8000164999645744,0.9999991

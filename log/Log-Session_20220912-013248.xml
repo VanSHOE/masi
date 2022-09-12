@@ -1,0 +1,7 @@
+<?xml version="1.0" ?><Session>
+<NegotiationOutcome exception="Failed to execute protocol: Execution failed of Rahul@0:java.lang.NullPointerException: bid can not be null: bid can not be null" currentTime="Mon Sep 12 01:32:48 IST 2022" lastAction="null" bids="0" runtime="0.007898" deadline="60rounds">
+<resultsOfAgent agent="Rahul" utilspace="etc/templates/partydomain/party1_utility.xml" agentClass="C:\Users\space\eclipse-workspace\masi\out\production\masi\Rahul.class" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
+</resultsOfAgent>
+<resultsOfAgent agent="SimpleAgent" utilspace="etc/templates/partydomain/party4_utility.xml" agentClass="agents.SimpleAgent" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
+</resultsOfAgent>
+</NegotiationOutcome></Session>

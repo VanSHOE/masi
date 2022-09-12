@@ -1,0 +1,7 @@
+<?xml version="1.0" ?><Session>
+<NegotiationOutcome currentTime="Mon Sep 12 16:38:22 IST 2022" timeOfAgreement="0.18032786885245902" lastAction="(Accept  bid:Bid[Place: Tokyo, Budget: 900, Days: 3, Purpose: Sightseeing])" domain="etc/templates/ANAC2016/SYAgent/JapanTrip.xml" bids="21" runtime="0.0512049" finalOutcome="Bid[Place: Tokyo, Budget: 900, Days: 3, Purpose: Sightseeing]" startingAgent="askBest@0" deadline="60rounds">
+<resultsOfAgent agent="askBest@0" agentDesc="Only accepts best utility!" utilspace="etc/templates/ANAC2016/SYAgent/JapanTrip_util1.xml" agentClass="askBest" userUtility="0.9811799144018712" finalUtility="1.0" discountedUtility="0.9811799144018712" discount="0.9" totalUserBother="0.0">
+</resultsOfAgent>
+<resultsOfAgent agent="SimpleAgent@1" agentDesc="Random bids until good offer is received" utilspace="etc/templates/ANAC2016/SYAgent/JapanTrip_util2.xml" agentClass="agents.SimpleAgent" userUtility="0.5445548524930386" finalUtility="0.555" discountedUtility="0.5445548524930386" discount="0.9" totalUserBother="0.0">
+</resultsOfAgent>
+</NegotiationOutcome></Session>

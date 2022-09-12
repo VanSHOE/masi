@@ -37,15 +37,14 @@ public class Rahul extends AbstractNegotiationParty
 	public Action chooseAction(List<Class<? extends Action>> possibleActions) 
 	{
 		// Check for acceptance if we have received an offer
-		if (lastOffer != null)
-			if (timeline.getTime() >= 0.9)
-				if (getUtility(lastOffer) >= utilitySpace.getReservationValue()) 
-					return new Accept(getPartyId(), lastOffer);
-				else
-					return new EndNegotiation(getPartyId());
-		
-		// Otherwise, send out a random offer above the target utility 
-		return new Offer(getPartyId(), generateRandomBidAboveTarget());
+		// choose 0 utility
+		if (lastOffer != null) {
+			return new Accept(getPartyId(), lastOffer);
+		}
+		else {
+			// take 0
+			return new EndNegotiation(getPartyId());
+		}
 	}
 
 	private Bid generateRandomBidAboveTarget() 
