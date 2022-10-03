@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.List;
 
 import genius.core.AgentID;
@@ -15,10 +16,16 @@ import genius.core.parties.NegotiationInfo;
 public class askBest extends AbstractNegotiationParty {
 
 	private Bid lastReceivedBid = null;
+	// create bids array
+	private Bid[] bids = new Bid[1000];
+	// curPtr
+	private int curPtr = 0;
 
 	@Override
 	public void init(NegotiationInfo info) {
 		super.init(info);
+		// set all bids to null
+		Arrays.fill(bids, null);
 	}
 
 	@Override
@@ -41,13 +48,14 @@ public class askBest extends AbstractNegotiationParty {
 	public void receiveMessage(AgentID sender, Action action) {
 		super.receiveMessage(sender, action);
 		if (action instanceof Offer) {
-			lastReceivedBid = ((Offer) action).getBid(); // If the action is an offer, store the bid as last received bid
+			bids[curPtr] = lastReceivedBid;
+			curPtr = (curPtr + 1) % bids.length;
 		}
 	}
 
 	@Override
 	public String getDescription() {
-		return "Only accepts best utility!";
+		return "Decides on the basis of history of bids.";
 	}
 
 }
