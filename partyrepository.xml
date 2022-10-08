@@ -444,7 +444,7 @@
             <partyRepItem classPath="negotiator.parties.FeedbackHillClimber" strategyParameters="">
                 <properties/>
             </partyRepItem>
-            <partyRepItem classPath="C:\Users\space\eclipse-workspace\masi\out\production\masi\askBest.class" strategyParameters="">
+            <partyRepItem classPath="C:\Users\space\eclipse-workspace\masi\out\production\masi\AgentBonda.class" strategyParameters="">
                 <properties/>
             </partyRepItem>
         </partyRepItems>
