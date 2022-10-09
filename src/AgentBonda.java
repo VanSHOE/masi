@@ -20,12 +20,12 @@ public class AgentBonda extends AbstractNegotiationParty {
 
 	private Bid lastReceivedBid = null;
 	// create bids array
-	private Bid[] bids = new Bid[1000];
+	private Bid[] Oppbids = new Bid[1000];
 	// Array of all possible bids
 	private Bid[] allBids;
 	// curPtr
 	private int curPtr = 0;
-	private double cRation;
+	private double cRation = 1.0;
 
 	NegotiationInfo cInfo;
 
@@ -35,7 +35,7 @@ public class AgentBonda extends AbstractNegotiationParty {
 
 		cInfo = info;
 		// set all bids to null
-		Arrays.fill(bids, null);
+		Arrays.fill(Oppbids, null);
 		// fill totalBids
 		BidIterator bidIterator = new BidIterator(info.getUtilitySpace().getDomain());
 		allBids = new Bid[(int)info.getUtilitySpace().getDomain().getNumberOfPossibleBids()];
@@ -46,7 +46,7 @@ public class AgentBonda extends AbstractNegotiationParty {
 		}
 
 		// print length of bids
-		System.out.println("Length of bids: " + bids.length);
+		System.out.println("Length of bids: " + Oppbids.length);
 		// sort on utility
 		Arrays.sort(allBids, (Bid b1, Bid b2) -> {
 			try {
@@ -70,6 +70,8 @@ public class AgentBonda extends AbstractNegotiationParty {
 		// find the bid with the reservation value and set cratio
 		for (int j = 0; j < allBids.length; j++) {
 			try {
+				// print each bid
+//				System.out.println("Bid: " + allBids[j] + " Utility: " + info.getUtilitySpace().getUtility(allBids[j]));
 				if (info.getUtilitySpace().getUtility(allBids[j]) <= reservationValue) {
 					cRation = j / (double)allBids.length;
 					break;
@@ -78,6 +80,8 @@ public class AgentBonda extends AbstractNegotiationParty {
 				e.printStackTrace();
 			}
 		}
+
+		System.out.println("Cratio: " + cRation);
 
 
 	}
@@ -93,10 +97,9 @@ public class AgentBonda extends AbstractNegotiationParty {
 			// get time
 			double time = getTimeLine().getTime();
 			// concession curbid
-			int curBid = (int) (cRation * time * bids.length) - 1;
+			int curBid = (int) (cRation * time * allBids.length) - 1;
 			// print current bid utility
 			// Current bid print
-
 
 			maxBid = allBids[curBid];
 			if (lastReceivedBid != null && getUtility(lastReceivedBid) >= getUtility(maxBid)) {
@@ -115,8 +118,8 @@ public class AgentBonda extends AbstractNegotiationParty {
 	public void receiveMessage(AgentID sender, Action action) {
 		super.receiveMessage(sender, action);
 		if (action instanceof Offer) {
-			bids[curPtr] = lastReceivedBid;
-			curPtr = (curPtr + 1) % bids.length;
+			Oppbids[curPtr] = lastReceivedBid;
+			curPtr = (curPtr + 1) % Oppbids.length;
 		}
 	}
 
