@@ -16,7 +16,7 @@ import genius.core.parties.NegotiationInfo;
 /**
  * This is your negotiation party.
  */
-public class AgentBonda extends AbstractNegotiationParty {
+public class Group6_Agent extends AbstractNegotiationParty {
 
 	private Bid lastReceivedBid = null;
 	// create bids array

@@ -447,6 +447,9 @@
             <partyRepItem classPath="C:\Users\space\eclipse-workspace\masi\out\production\masi\AgentBonda.class" strategyParameters="">
                 <properties/>
             </partyRepItem>
+            <partyRepItem classPath="C:\Users\hadit\OneDrive - International Institute of Information Technology\Assignments\Multi Agent Systems\masi\out\production\masi\AgentBonda.class" strategyParameters="">
+                <properties/>
+            </partyRepItem>
         </partyRepItems>
         <domainRepItem/>
         <protocolRepItem/>
