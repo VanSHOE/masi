@@ -26,7 +26,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	// curPtr
 	private int curPtr = 0;
 	private double cRation = 1.0;
-	private double d = 25;
+	private double d = 5;
 
 	NegotiationInfo cInfo;
 
@@ -105,7 +105,11 @@ public class Group6_Agent extends AbstractNegotiationParty {
 			// get time
 			double time = getTimeLine().getTime();
 			// concession curbid
-			int curBid = (int) (cRation * time * allBids.length) - 1;
+			// get concederutil
+			double concederUtil = 1 - getConcederUtil();
+			// print
+			System.out.println("Conceder util: " + concederUtil);
+			int curBid = (int) (concederUtil* cRation * allBids.length) - 1;
 			// print current bid utility
 			// Current bid print
 
@@ -128,6 +132,10 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		if (action instanceof Offer) {
 			Oppbids[curPtr] = lastReceivedBid;
 			curPtr = (curPtr + 1) % Oppbids.length;
+			// if utility of last received bid less than 0.5 increment d, become aggressive
+			if (getUtility(lastReceivedBid) < 0.5) {
+				d += 1;
+			}
 		}
 	}
 
