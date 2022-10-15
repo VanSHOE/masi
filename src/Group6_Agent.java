@@ -26,6 +26,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	// curPtr
 	private int curPtr = 0;
 	private double cRation = 1.0;
+	private double d = 25;
 
 	NegotiationInfo cInfo;
 
@@ -34,6 +35,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		super.init(info);
 
 		cInfo = info;
+
 		// set all bids to null
 		Arrays.fill(Oppbids, null);
 		// fill totalBids
@@ -86,6 +88,12 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 	}
 
+	public double getConcederUtil() {
+		// get curTime
+		double curTime = timeline.getTime();
+		// func is 1 - tan(t*arctan(d))/d
+		return 1 - Math.tan(curTime * Math.atan(d)) / d;
+	}
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> validActions) {
 		// variable to store max bid
