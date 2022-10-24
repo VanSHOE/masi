@@ -8,6 +8,8 @@ import genius.core.actions.Accept;
 import genius.core.actions.Action;
 import genius.core.actions.EndNegotiation;
 import genius.core.actions.Offer;
+import genius.core.issue.Issue;
+import genius.core.issue.IssueDiscrete;
 import genius.core.parties.AbstractNegotiationParty;
 import genius.core.parties.NegotiationInfo;
 // import for getParties()
@@ -25,15 +27,31 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	private Bid[] allBids;
 	// curPtr
 	private int curPtr = 0;
-	private double cRation = 1.0;
-	private double d = 5;
+	private double d = 0.5;
 
 	NegotiationInfo cInfo;
 
 	@Override
 	public void init(NegotiationInfo info) {
 		super.init(info);
-
+		// print all issues
+//		List<Issue> allIssues = info.getUtilitySpace().getDomain().getIssues();
+//		// create 2d matrix
+//		int[][] allIssueValues = new int[allIssues.size()][];
+//		for (Issue issue : allIssues) {
+//			System.out.println(issue);
+//			// print possible values
+//			// check if instance of issuedescrete
+//			if (issue instanceof IssueDiscrete) {
+//				IssueDiscrete issueDiscrete = (IssueDiscrete) issue;
+//				for (int i = 0; i < issueDiscrete.getNumberOfValues(); i++) {
+//					System.out.println(issueDiscrete.getValue(i));
+//				}
+//			}
+//
+//		}
+//		// crash agent
+//	 	System.exit(0);
 		cInfo = info;
 
 		// set all bids to null
@@ -60,30 +78,30 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		});
 
 
-		// find reservation value
-		double reservationValue = 0;
-		try {
-			reservationValue = info.getUtilitySpace().getReservationValueUndiscounted();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("Reservation value: " + reservationValue);
-
-		// find the bid with the reservation value and set cratio
-		for (int j = 0; j < allBids.length; j++) {
-			try {
-				// print each bid
-//				System.out.println("Bid: " + allBids[j] + " Utility: " + info.getUtilitySpace().getUtility(allBids[j]));
-				if (info.getUtilitySpace().getUtility(allBids[j]) <= reservationValue) {
-					cRation = j / (double)allBids.length;
-					break;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		System.out.println("Cratio: " + cRation);
+//		// find reservation value
+//		double reservationValue = 0;
+//		try {
+//			reservationValue = info.getUtilitySpace().getReservationValue();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		System.out.println("Reservation value: " + reservationValue);
+//
+//		// find the bid with the reservation value and set cratio
+//		for (int j = 0; j < allBids.length; j++) {
+//			try {
+//				// print each bid
+////				System.out.println("Bid: " + allBids[j] + " Utility: " + info.getUtilitySpace().getUtility(allBids[j]));
+//				if (info.getUtilitySpace().getUtility(allBids[j]) <= reservationValue) {
+//					cRation = j / (double)allBids.length;
+//					break;
+//				}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
+//		System.out.println("Cratio: " + cRation);
 
 
 	}
@@ -93,49 +111,80 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		double curTime = timeline.getTime();
 		// func is 1 - tan(t*arctan(d))/d
 		return 1 - Math.tan(curTime * Math.atan(d)) / d;
+//		return 1 - curTime * d + 1;
+	}
+
+	public double getJustAcceptProb()
+	{
+		double curTime = timeline.getTime();
+		// func is 0.8*(e^dx - 1) / (e^d - 1)
+		return 0.8 * (Math.exp(d * curTime) - 1) / (Math.exp(d) - 1);
 	}
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> validActions) {
 		// variable to store max bid
-		Bid maxBid;
+
 		System.out.println("Time left: " + getTimeLine().getTime());
 		// deadline
 
 		try {
 			// get time
+
+			if (getUtility(lastReceivedBid) < 0.3) {
+				d += 0.5;
+				// clip at 6
+				if (d > 10) {
+					d = 10;
+				}
+
+				// print d
+				System.out.println("D: " + d);
+			}
+
 			double time = getTimeLine().getTime();
 			// concession curbid
 			// get concederutil
-			double concederUtil = 1 - getConcederUtil();
+			double concederUtil = getConcederUtil();
 			// print
 			System.out.println("Conceder util: " + concederUtil);
-			int curBid = (int) (concederUtil* cRation * allBids.length) - 1;
-			// print current bid utility
-			// Current bid print
 
-			maxBid = allBids[curBid];
-			if (lastReceivedBid != null && getUtility(lastReceivedBid) >= getUtility(maxBid)) {
+			double p = getJustAcceptProb();
+
+			if (lastReceivedBid != null && (getUtility(lastReceivedBid) >= concederUtil || p * getUtility(lastReceivedBid) >= (1 - p) * concederUtil)) {
 				return new Accept(getPartyId(), lastReceivedBid); // If the last received bid is equal or better(not really possible but since this involves floating point arithmetic, even greater is fine) than the maximum possible bid, accept it
 			}
+
+			// find bid with util greater or equal
+			Bid maxBid = allBids[0];
+			for (Bid allBid : allBids) {
+				if (getUtility(allBid) >= concederUtil) {
+					maxBid = allBid;
+				} else {
+//					maxBid = allBids[i - 1];
+					break;
+				}
+			}
+
 			System.out.println("Current bid: " + maxBid);
 			System.out.println("Current bid utility: " + getUtility(maxBid));
 			return new Offer(getPartyId(), maxBid); // If the last received bid is not equal or better than the maximum possible bid, offer the maximum possible bid
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new EndNegotiation(getPartyId()); // If something goes wrong, end the negotiation
+			// accept
+			return new Accept(getPartyId(), lastReceivedBid);
 		}
 	}
 
 	@Override
 	public void receiveMessage(AgentID sender, Action action) {
 		super.receiveMessage(sender, action);
+		// print sender and action
+		System.out.println("Current sender: " + sender + " Action: " + action);
+
 		if (action instanceof Offer) {
 			Oppbids[curPtr] = lastReceivedBid;
 			curPtr = (curPtr + 1) % Oppbids.length;
 			// if utility of last received bid less than 0.5 increment d, become aggressive
-			if (getUtility(lastReceivedBid) < 0.5) {
-				d += 1;
-			}
 		}
 	}
 
