@@ -47,7 +47,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		// create 2d matrix
 
 		allIssueValues = new ValueDiscrete[allIssues.size()][];
-		for (Issue issue : allIssues) {
+		for (int ii = 0; ii < allIssues.size(); ii++) {
+			Issue issue = allIssues.get(ii);
 			System.out.println(issue);
 			// print possible values
 			// check if instance of issuedescrete
@@ -56,7 +57,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 				allIssueValues[issue.getNumber() - 1] = new ValueDiscrete[issueDiscrete.getNumberOfValues()];
 				for (int i = 0; i < issueDiscrete.getNumberOfValues(); i++) {
 					System.out.println(issueDiscrete.getValue(i));
-					allIssueValues[issue.getNumber() - 1][i] = issueDiscrete.getValue(i);
+					allIssueValues[ii][i] = issueDiscrete.getValue(i);
 				}
 			}
 			else {
@@ -255,20 +256,23 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		{
 			return;
 		}
-
+		Bid bid = null;
 		if (action instanceof Offer) {
-			if (Oppbids.length > 0)
+			bid = ((Offer) action).getBid();
+			if (Oppbids[agent2Index.get(sender)].size() > 0)
 			{
 				Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
 				Bid curBid = ((Offer) action).getBid();
+
 
 				// if not equal
 				if (lastBid != null && !lastBid.equals(curBid))
 				{
 					for (int i = 0; i < allIssues.size(); i++)
 					{
-						Value lastVal = lastBid.getValue(i);
-						Value curVal = curBid.getValue(i);
+						int s = allIssues.get(i).getNumber();
+						Value lastVal = lastBid.getValue(s);
+						Value curVal = curBid.getValue(s);
 
 						if (lastVal != curVal)
 						{
@@ -280,18 +284,21 @@ public class Group6_Agent extends AbstractNegotiationParty {
 			Oppbids[agent2Index.get(sender)].add(((Offer) action).getBid());
 		}
 		else {
-			if (Oppbids.length > 0)
+			bid = ((Accept) action).getBid();
+			if (Oppbids[agent2Index.get(sender)].size() > 0)
 			{
 				Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
 				Bid curBid = ((Accept) action).getBid();
+
 
 				// if not equal
 				if (lastBid != null && !lastBid.equals(curBid))
 				{
 					for (int i = 0; i < allIssues.size(); i++)
 					{
-						Value lastVal = lastBid.getValue(i);
-						Value curVal = curBid.getValue(i);
+						int s = allIssues.get(i).getNumber();
+						Value lastVal = lastBid.getValue(s);
+						Value curVal = curBid.getValue(s);
 
 						if (lastVal != curVal)
 						{
@@ -305,7 +312,10 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 		// update freq table
 		int SIdx = agent2Index.get(sender);
-		Bid bid = lastReceivedBid;
+
+		if(bid == null)
+			return;
+
 		for (int i = 0; i < allIssues.size(); i++)
 		{
 			IssueDiscrete issue = (IssueDiscrete) allIssues.get(i);
