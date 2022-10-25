@@ -9,6 +9,7 @@ import genius.core.BidIterator;
 import genius.core.actions.*;
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;
+import genius.core.issue.Value;
 import genius.core.issue.ValueDiscrete;
 import genius.core.parties.AbstractNegotiationParty;
 import genius.core.parties.NegotiationInfo;
@@ -236,11 +237,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
 				Oppbids[i] = new LinkedList<Bid>();
 			}
 
-
-
-
 			// crash
-			System.exit(0);
+//			System.exit(0);
 		}
 		if (sender != null)
 		{
@@ -253,9 +251,82 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		}
 		System.out.println("Current sender: " + sender + " Action: " + action);
 
+		if (!(action instanceof Offer) && !(action instanceof Accept))
+		{
+			return;
+		}
+
 		if (action instanceof Offer) {
+			if (Oppbids.length > 0)
+			{
+				Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
+				Bid curBid = ((Offer) action).getBid();
+
+				// if not equal
+				if (lastBid != null && !lastBid.equals(curBid))
+				{
+					for (int i = 0; i < allIssues.size(); i++)
+					{
+						Value lastVal = lastBid.getValue(i);
+						Value curVal = curBid.getValue(i);
+
+						if (lastVal != curVal)
+						{
+							issueChanges[agent2Index.get(sender)][i]++;
+						}
+					}
+				}
+			}
 			Oppbids[agent2Index.get(sender)].add(((Offer) action).getBid());
 		}
+		else {
+			if (Oppbids.length > 0)
+			{
+				Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
+				Bid curBid = ((Accept) action).getBid();
+
+				// if not equal
+				if (lastBid != null && !lastBid.equals(curBid))
+				{
+					for (int i = 0; i < allIssues.size(); i++)
+					{
+						Value lastVal = lastBid.getValue(i);
+						Value curVal = curBid.getValue(i);
+
+						if (lastVal != curVal)
+						{
+							issueChanges[agent2Index.get(sender)][i]++;
+						}
+					}
+				}
+			}
+			Oppbids[agent2Index.get(sender)].add(((Accept) action).getBid());
+		}
+
+		// update freq table
+		int SIdx = agent2Index.get(sender);
+		Bid bid = lastReceivedBid;
+		for (int i = 0; i < allIssues.size(); i++)
+		{
+			IssueDiscrete issue = (IssueDiscrete) allIssues.get(i);
+			ValueDiscrete valIdx = ((ValueDiscrete) bid.getValue(issue.getNumber()));
+			// search for idx in allissuesvalues
+			int idx = -1;
+			for (int j = 0; j < issue.getNumberOfValues(); j++)
+			{
+				if (issue.getValue(j).equals(valIdx))
+				{
+					idx = j;
+					break;
+				}
+			}
+
+			if (idx >= 0 && idx < issue.getNumberOfValues())
+			{
+				freqTable[SIdx][i][idx]++;
+			}
+		}
+
 	}
 
 	@Override
