@@ -134,6 +134,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 	}
 
+
 	public double getConcederUtil() {
 		// get curTime
 		double curTime = timeline.getTime();
@@ -148,24 +149,67 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		// func is 0.8*(e^dx - 1) / (e^d - 1)
 		return 0.8 * (Math.exp(d * curTime) - 1) / (Math.exp(d) - 1);
 	}
+//	public double stdDev(Arrays arr, int len) {
+//		double sum = 0.0, standardDeviation = 0.0;
+//
+//		for(double num : arr) {
+//			sum += num;
+//		}
+//
+//		double mean = sum/ len;
+//
+//		for(double num: arr) {
+//			standardDeviation += Math.pow(num - mean, 2);
+//		}
+//
+//		return Math.sqrt(standardDeviation/ len);
+//	}
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> validActions) {
-		// variable to store max bid
-
 		System.out.println("Time left: " + getTimeLine().getTime());
-		// deadline
-
 		try {
-			// get time
+			double[][] hypoWeights = new double[totalParties][allIssues.size()];
+			// fill
+
+			for (int i = 0; i < totalParties; i++) {
+
+				int sumIss = 0;
+				for (int k = 0; k < allIssues.size(); k++) {
+					sumIss += issueChanges[i][k];
+				}
+
+				if (sumIss == 0)
+				{
+					for (int j = 0; j < allIssues.size(); j++) {
+						hypoWeights[i][j] = 1.0 / allIssues.size();
+					}
+
+					continue;
+				}
+
+				for (int j = 0; j < allIssues.size(); j++) {
+					hypoWeights[i][j] = issueChanges[i][j] / (double)sumIss;
+					hypoWeights[i][j] = 1 - hypoWeights[i][j];
+				}
+
+				// normalize
+				double sum = 0;
+				for (int j = 0; j < allIssues.size(); j++) {
+					sum += hypoWeights[i][j];
+				}
+
+				for (int j = 0; j < allIssues.size(); j++) {
+					hypoWeights[i][j] /= sum;
+				}
+			}
 
 			if (getUtility(lastReceivedBid) < 0.3) {
 				d += 0.5;
-				// clip at 6
+
 				if (d > 10) {
 					d = 10;
 				}
 
-				// print d
 				System.out.println("D: " + d);
 			}
 
@@ -209,7 +253,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		// print sender and action
 		if (action instanceof Inform && totalParties == -1)
 		{
-			totalParties = (int)((Inform) action).getValue();
+			totalParties = (int)((Inform) action).getValue() - 1;
 
 			freqTable = new int[totalParties][allIssues.size()][];
 			for (int i = 0; i < totalParties; i++)
