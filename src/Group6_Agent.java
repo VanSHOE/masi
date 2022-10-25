@@ -1,15 +1,15 @@
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedList;
 
 import genius.core.AgentID;
 import genius.core.Bid;
 import genius.core.BidIterator;
-import genius.core.actions.Accept;
-import genius.core.actions.Action;
-import genius.core.actions.EndNegotiation;
-import genius.core.actions.Offer;
+import genius.core.actions.*;
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;
+import genius.core.issue.ValueDiscrete;
 import genius.core.parties.AbstractNegotiationParty;
 import genius.core.parties.NegotiationInfo;
 // import for getParties()
@@ -22,40 +22,65 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 	private Bid lastReceivedBid = null;
 	// create bids array
-	private Bid[] Oppbids = new Bid[1000];
+	private LinkedList<Bid>[] Oppbids;
 	// Array of all possible bids
 	private Bid[] allBids;
 	// curPtr
 	private int curPtr = 0;
 	private double d = 0.5;
-
+	private int totalParties = -1;
+	private int curParty = 0;
+	private int[][] issueChanges;
+	private int[][][] freqTable;
+	private HashMap<AgentID, Integer> agent2Index = new HashMap<AgentID, Integer>();
+	private HashMap<Integer, AgentID> index2Agent = new HashMap<Integer, AgentID>();
+	private List<Issue> allIssues;
+	ValueDiscrete[][] allIssueValues;
 	NegotiationInfo cInfo;
 
 	@Override
 	public void init(NegotiationInfo info) {
 		super.init(info);
 		// print all issues
-//		List<Issue> allIssues = info.getUtilitySpace().getDomain().getIssues();
-//		// create 2d matrix
-//		int[][] allIssueValues = new int[allIssues.size()][];
-//		for (Issue issue : allIssues) {
-//			System.out.println(issue);
-//			// print possible values
-//			// check if instance of issuedescrete
-//			if (issue instanceof IssueDiscrete) {
-//				IssueDiscrete issueDiscrete = (IssueDiscrete) issue;
-//				for (int i = 0; i < issueDiscrete.getNumberOfValues(); i++) {
-//					System.out.println(issueDiscrete.getValue(i));
-//				}
-//			}
-//
-//		}
+		allIssues = info.getUtilitySpace().getDomain().getIssues();
+		// create 2d matrix
+
+		allIssueValues = new ValueDiscrete[allIssues.size()][];
+		for (Issue issue : allIssues) {
+			System.out.println(issue);
+			// print possible values
+			// check if instance of issuedescrete
+			if (issue instanceof IssueDiscrete) {
+				IssueDiscrete issueDiscrete = (IssueDiscrete) issue;
+				allIssueValues[issue.getNumber() - 1] = new ValueDiscrete[issueDiscrete.getNumberOfValues()];
+				for (int i = 0; i < issueDiscrete.getNumberOfValues(); i++) {
+					System.out.println(issueDiscrete.getValue(i));
+					allIssueValues[issue.getNumber() - 1][i] = issueDiscrete.getValue(i);
+				}
+			}
+			else {
+				System.out.println("Not an issue discrete");
+			}
+
+		}
+		// print array
+		System.out.println(Arrays.deepToString(allIssueValues));
+		// calculate possible bids from 2d matrix values * issues
+		int totalBids = 1;
+		for (int i = 0; i < allIssueValues.length; i++) {
+			totalBids *= allIssueValues[i].length;
+		}
+		System.out.println("Total bids: " + totalBids);
+
+		// construct a bid
+		Bid bid = new Bid(info.getUtilitySpace().getDomain());
+
 //		// crash agent
-//	 	System.exit(0);
+
 		cInfo = info;
 
 		// set all bids to null
-		Arrays.fill(Oppbids, null);
+//		Arrays.fill(Oppbids, null);
 		// fill totalBids
 		BidIterator bidIterator = new BidIterator(info.getUtilitySpace().getDomain());
 		allBids = new Bid[(int)info.getUtilitySpace().getDomain().getNumberOfPossibleBids()];
@@ -66,7 +91,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		}
 
 		// print length of bids
-		System.out.println("Length of bids: " + Oppbids.length);
+		System.out.println("Length of bids: " + allBids.length);
+//		System.exit(0);
 		// sort on utility
 		Arrays.sort(allBids, (Bid b1, Bid b2) -> {
 			try {
@@ -179,12 +205,56 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	public void receiveMessage(AgentID sender, Action action) {
 		super.receiveMessage(sender, action);
 		// print sender and action
+		if (action instanceof Inform && totalParties == -1)
+		{
+			totalParties = (int)((Inform) action).getValue();
+
+			freqTable = new int[totalParties][allIssues.size()][];
+			for (int i = 0; i < totalParties; i++)
+			{
+				for (int j = 0; j < allIssues.size(); j++)
+				{
+					freqTable[i][j] = new int[((IssueDiscrete) allIssues.get(j)).getNumberOfValues()];
+					Arrays.fill(freqTable[i][j], 0);
+				}
+			}
+
+			// print
+			System.out.println("Total parties: " + totalParties);
+			System.out.println("Freq table: " + Arrays.deepToString(freqTable));
+			issueChanges = new int[totalParties][allIssues.size()];
+
+			for (int i = 0; i < totalParties; i++)
+			{
+				Arrays.fill(issueChanges[i], 0);
+			}
+
+			Oppbids = new LinkedList[totalParties];
+
+			for (int i = 0; i < totalParties; i++)
+			{
+				Oppbids[i] = new LinkedList<Bid>();
+			}
+
+
+
+
+			// crash
+			System.exit(0);
+		}
+		if (sender != null)
+		{
+			// check if it exists in hashmaps
+			if (!agent2Index.containsKey(sender))
+			{
+				agent2Index.put(sender, agent2Index.size());
+				index2Agent.put(index2Agent.size(), sender);
+			}
+		}
 		System.out.println("Current sender: " + sender + " Action: " + action);
 
 		if (action instanceof Offer) {
-			Oppbids[curPtr] = lastReceivedBid;
-			curPtr = (curPtr + 1) % Oppbids.length;
-			// if utility of last received bid less than 0.5 increment d, become aggressive
+			Oppbids[agent2Index.get(sender)].add(((Offer) action).getBid());
 		}
 	}
 
