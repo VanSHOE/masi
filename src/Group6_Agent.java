@@ -223,8 +223,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 			for(int i = 0;i<totalParties;i++)
 			{
-				int sum = 0;
-				int sumMeans = 0;
+				double sum = 0;
+				double sumMeans = 0;
 				for(int j = 0;j<allIssues.size();j++)
 				{
 					Integer sumAllFreq = 0;
