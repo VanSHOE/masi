@@ -227,33 +227,39 @@ public class Group6_Agent extends AbstractNegotiationParty {
 				int sumMeans = 0;
 				for(int j = 0;j<allIssues.size();j++)
 				{
+					Integer sumAllFreq = 0;
+					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
+					{
+						sumAllFreq += freqTable[i][j][k];
+					}
+
+					String issueName = allIssues.get(j).getName();
 					double mean = 0;
 					// TODO: Add issue discrete checks
 					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
 					{
-						mean += freqTable[i][j][k];
+						mean += k * freqTable[i][j][k];
 					}
-					mean /= ((IssueDiscrete)allIssues.get(j)).getNumberOfValues();
-					double valMean = 0;
-					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
-					{
-
-						// multiply by utility of value
-//						Bid tempBid = new Bid(cInfo.getUtilitySpace().getDomain());
-//						tempBid.putValue(allIssues.get(j).getNumber(), ((IssueDiscrete)allIssues.get(j)).getValue(k));
-//						double evalVal = ((AdditiveUtilitySpace) utilitySpace).getEvaluation(allIssues.get(j).getNumber(), tempBid);
-
-//						valMean += freqTable[i][j][k] * evalVal;
-					}
-					sumMeans += valMean;
+					mean /= sumAllFreq;
 
 					double stdDev = 0;
 					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
 					{
-						stdDev += Math.pow(freqTable[i][j][k] - mean, 2);
+						for (int l = 0; l < freqTable[i][j][k]; l++) {
+							stdDev += Math.pow(k - mean, 2);
+						}
 					}
-					stdDev /= ((IssueDiscrete)allIssues.get(j)).getNumberOfValues();
+					stdDev /= sumAllFreq;
 					stdDev = Math.sqrt(stdDev);
+
+					double valMean = 0;
+					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
+					{
+						double valEval = issueValueEvals.get(issueName).get(((IssueDiscrete)allIssues.get(j)).getValue(k).toString());
+						valMean += freqTable[i][j][k] * valEval;
+					}
+					valMean /= sumAllFreq;
+					sumMeans += valMean;
 					sum += stdDev;
 				}
 				sum /= allIssues.size();
