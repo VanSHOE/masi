@@ -1,18 +1,14 @@
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedList;
-
+import java.util.*;
 import genius.core.AgentID;
 import genius.core.Bid;
 import genius.core.BidIterator;
 import genius.core.actions.*;
-import genius.core.issue.Issue;
-import genius.core.issue.IssueDiscrete;
-import genius.core.issue.Value;
-import genius.core.issue.ValueDiscrete;
+import genius.core.issue.*;
 import genius.core.parties.AbstractNegotiationParty;
 import genius.core.parties.NegotiationInfo;
+import genius.core.utility.AdditiveUtilitySpace;
+import genius.core.utility.Evaluator;
+import genius.core.utility.EvaluatorDiscrete;
 // import for getParties()
 
 
@@ -35,6 +31,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	private int[][][] freqTable;
 	private HashMap<AgentID, Integer> agent2Index = new HashMap<AgentID, Integer>();
 	private HashMap<Integer, AgentID> index2Agent = new HashMap<Integer, AgentID>();
+	private HashMap<String, HashMap<String, Integer>> issueValueEvals = new HashMap<String, HashMap<String, Integer>>();
 	private List<Issue> allIssues;
 	ValueDiscrete[][] allIssueValues;
 	NegotiationInfo cInfo;
@@ -105,6 +102,23 @@ public class Group6_Agent extends AbstractNegotiationParty {
 			return 0;
 		});
 
+		Map<Objective, Evaluator> eval =  ((AdditiveUtilitySpace) utilitySpace).getfEvaluators();
+		// print all keys
+		for (Objective key : eval.keySet()) {
+			System.out.print("Key: " + key);
+			EvaluatorDiscrete evalDiscrete = (EvaluatorDiscrete) eval.get(key);
+			Set<ValueDiscrete> values = evalDiscrete.getValues();
+			System.out.println(" Value: " + evalDiscrete);
+			// check if issue exists in issueValueEvals
+			if (!issueValueEvals.containsKey(key.toString())) {
+				issueValueEvals.put(key.toString(), new HashMap<String, Integer>());
+			}
+			// add values to issueValueEvals
+			for (ValueDiscrete value : values) {
+				issueValueEvals.get(key.toString()).put(value.toString(), evalDiscrete.getValue(value));
+			}
+		}
+		System.out.println("Eval: " + eval);
 
 //		// find reservation value
 //		double reservationValue = 0;
@@ -202,6 +216,57 @@ public class Group6_Agent extends AbstractNegotiationParty {
 					hypoWeights[i][j] /= sum;
 				}
 			}
+
+			double[] stdDevs = new double[totalParties]; // std dev of freq table
+			double[] means = new double[totalParties]; // mean of freq table
+			double[] niceness = new double[totalParties]; // niceness of agent
+
+			for(int i = 0;i<totalParties;i++)
+			{
+				int sum = 0;
+				int sumMeans = 0;
+				for(int j = 0;j<allIssues.size();j++)
+				{
+					double mean = 0;
+					// TODO: Add issue discrete checks
+					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
+					{
+						mean += freqTable[i][j][k];
+					}
+					mean /= ((IssueDiscrete)allIssues.get(j)).getNumberOfValues();
+					double valMean = 0;
+					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
+					{
+
+						// multiply by utility of value
+//						Bid tempBid = new Bid(cInfo.getUtilitySpace().getDomain());
+//						tempBid.putValue(allIssues.get(j).getNumber(), ((IssueDiscrete)allIssues.get(j)).getValue(k));
+//						double evalVal = ((AdditiveUtilitySpace) utilitySpace).getEvaluation(allIssues.get(j).getNumber(), tempBid);
+
+//						valMean += freqTable[i][j][k] * evalVal;
+					}
+					sumMeans += valMean;
+
+					double stdDev = 0;
+					for(int k = 0;k<((IssueDiscrete)allIssues.get(j)).getNumberOfValues();k++)
+					{
+						stdDev += Math.pow(freqTable[i][j][k] - mean, 2);
+					}
+					stdDev /= ((IssueDiscrete)allIssues.get(j)).getNumberOfValues();
+					stdDev = Math.sqrt(stdDev);
+					sum += stdDev;
+				}
+				sum /= allIssues.size();
+				sumMeans /= allIssues.size();
+				stdDevs[i] = sum;
+				means[i] = sumMeans;
+			}
+			// niceness = means / (1 + stddev) + stddev / (1 + means), handle - divide by 0
+			for(int i = 0;i<totalParties;i++)
+			{
+				niceness[i] = means[i] / (1 + stdDevs[i]) + stdDevs[i] / (1 + means[i]);
+			}
+
 
 			if (getUtility(lastReceivedBid) < 0.3) {
 				d += 0.5;
