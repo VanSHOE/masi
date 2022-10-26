@@ -273,7 +273,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 				niceness[i] = means[i] / (1 + stdDevs[i]) + stdDevs[i] / (1 + means[i]);
 			}
 
-
+			// TODO: Think on what to do after this. Like use the niceness and weights etc. to find some ordering of bids (sort the all bids array)
 			if (getUtility(lastReceivedBid) < 0.3) {
 				d += 0.5;
 
