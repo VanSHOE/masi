@@ -120,7 +120,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		}
 		System.out.println("Eval: " + eval);
 
-//		// find reservation value
+		// TODO: find reservation value
 //		double reservationValue = 0;
 //		try {
 //			reservationValue = info.getUtilitySpace().getReservationValue();
@@ -493,6 +493,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		for (int i = 0; i < allIssues.size(); i++)
 		{
 			IssueDiscrete issue = (IssueDiscrete) allIssues.get(i);
+			// TODO: We need to make our agent crash friendly with try except
 			ValueDiscrete valIdx = ((ValueDiscrete) bid.getValue(issue.getNumber()));
 			// search for idx in allissuesvalues
 			int idx = -1;
