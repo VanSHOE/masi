@@ -25,7 +25,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	// curPtr
 	private int curPtr = 0;
 	private double d = 0.5;
-	private int totalParties = -1;
+	private int totalEnemies = -1;
 	private int curParty = 0;
 	private int[][] issueChanges;
 	private int[][][] freqTable;
@@ -182,10 +182,10 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	public Action chooseAction(List<Class<? extends Action>> validActions) {
 		System.out.println("Time left: " + getTimeLine().getTime());
 		try {
-			double[][] hypoWeights = new double[totalParties][allIssues.size()];
+			double[][] hypoWeights = new double[totalEnemies][allIssues.size()];
 			// fill
 
-			for (int i = 0; i < totalParties; i++) {
+			for (int i = 0; i < totalEnemies; i++) {
 
 				int sumIss = 0;
 				for (int k = 0; k < allIssues.size(); k++) {
@@ -217,11 +217,11 @@ public class Group6_Agent extends AbstractNegotiationParty {
 				}
 			}
 
-			double[] stdDevs = new double[totalParties]; // std dev of freq table
-			double[] means = new double[totalParties]; // mean of freq table
-			double[] niceness = new double[totalParties]; // niceness of agent
+			double[] stdDevs = new double[totalEnemies]; // std dev of freq table
+			double[] means = new double[totalEnemies]; // mean of freq table
+			double[] niceness = new double[totalEnemies]; // niceness of agent
 
-			for(int i = 0;i<totalParties;i++)
+			for(int i = 0; i< totalEnemies; i++)
 			{
 				double sum = 0;
 				double sumMeans = 0;
@@ -268,12 +268,43 @@ public class Group6_Agent extends AbstractNegotiationParty {
 				means[i] = sumMeans;
 			}
 			// niceness = means / (1 + stddev) + stddev / (1 + means), handle - divide by 0
-			for(int i = 0;i<totalParties;i++)
+			for(int i = 0; i< totalEnemies; i++)
 			{
 				niceness[i] = means[i] / (1 + stdDevs[i]) + stdDevs[i] / (1 + means[i]);
 			}
 
 			// TODO: Think on what to do after this. Like use the niceness and weights etc. to find some ordering of bids (sort the all bids array)
+
+			Arrays.sort(allBids, (Bid b1, Bid b2) -> {
+				try {
+//					return Double.compare(cInfo.getUtilitySpace().getUtility(b2), cInfo.getUtilitySpace().getUtility(b1));
+					double myUtil1 = cInfo.getUtilitySpace().getUtility(b1);
+					double myUtil2 = cInfo.getUtilitySpace().getUtility(b2);
+					double[] util1 = new double[totalEnemies];
+					double[] util2 = new double[totalEnemies];
+
+					double val1 = 0;
+					double val2 = 0;
+					for(int i = 0; i< totalEnemies; i++)
+					{
+						val1 += util1[i] * niceness[i];
+						val2 += util2[i] * niceness[i];
+					}
+					val1 /= totalEnemies;
+					val2 /= totalEnemies;
+
+					double compFunc1 = Math.pow(myUtil1, 2) * Math.pow(val1, 2);
+					double compFunc2 = Math.pow(myUtil2, 2) * Math.pow(val2, 2);
+
+					return Double.compare(compFunc2, compFunc1);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return 0;
+			});
+
+
+
 			if (getUtility(lastReceivedBid) < 0.3) {
 				d += 0.5;
 
@@ -322,12 +353,12 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	public void receiveMessage(AgentID sender, Action action) {
 		super.receiveMessage(sender, action);
 		// print sender and action
-		if (action instanceof Inform && totalParties == -1)
+		if (action instanceof Inform && totalEnemies == -1)
 		{
-			totalParties = (int)((Inform) action).getValue() - 1;
+			totalEnemies = (int)((Inform) action).getValue() - 1;
 
-			freqTable = new int[totalParties][allIssues.size()][];
-			for (int i = 0; i < totalParties; i++)
+			freqTable = new int[totalEnemies][allIssues.size()][];
+			for (int i = 0; i < totalEnemies; i++)
 			{
 				for (int j = 0; j < allIssues.size(); j++)
 				{
@@ -337,18 +368,18 @@ public class Group6_Agent extends AbstractNegotiationParty {
 			}
 
 			// print
-			System.out.println("Total parties: " + totalParties);
+			System.out.println("Total parties: " + totalEnemies);
 			System.out.println("Freq table: " + Arrays.deepToString(freqTable));
-			issueChanges = new int[totalParties][allIssues.size()];
+			issueChanges = new int[totalEnemies][allIssues.size()];
 
-			for (int i = 0; i < totalParties; i++)
+			for (int i = 0; i < totalEnemies; i++)
 			{
 				Arrays.fill(issueChanges[i], 0);
 			}
 
-			Oppbids = new LinkedList[totalParties];
+			Oppbids = new LinkedList[totalEnemies];
 
-			for (int i = 0; i < totalParties; i++)
+			for (int i = 0; i < totalEnemies; i++)
 			{
 				Oppbids[i] = new LinkedList<Bid>();
 			}
