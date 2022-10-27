@@ -161,7 +161,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 	{
 		double curTime = timeline.getTime();
 		// func is 0.8*(e^dx - 1) / (e^d - 1)
-		return 0.8 * (Math.exp(d * curTime) - 1) / (Math.exp(d) - 1);
+		return 1.0 * (Math.exp(d * curTime) - 1) / (Math.exp(d) - 1);
 	}
 //	public double stdDev(Arrays arr, int len) {
 //		double sum = 0.0, standardDeviation = 0.0;
@@ -283,6 +283,31 @@ public class Group6_Agent extends AbstractNegotiationParty {
 					double[] util1 = new double[totalEnemies];
 					double[] util2 = new double[totalEnemies];
 
+					for (int i = 0; i < totalEnemies; i++) {
+						util1[i] = 0;
+						util2[i] = 0;
+
+						for (int j = 0; j < allIssues.size(); j++) {
+							IssueDiscrete issue = (IssueDiscrete)allIssues.get(j);
+							int issueNum = issue.getNumber();
+							int sumFreq = 0;
+
+							for (int k = 0; k < issue.getNumberOfValues(); k++) {
+								sumFreq += freqTable[i][j][k];
+							}
+
+							double issueWeight = hypoWeights[i][j];
+							int val1idx = issue.getValueIndex((ValueDiscrete)b1.getValue(issueNum));
+							int val2idx = issue.getValueIndex((ValueDiscrete)b2.getValue(issueNum));
+
+							double issueGain1 = issueWeight * freqTable[i][j][val1idx] / (double)sumFreq;
+							double issueGain2 = issueWeight * freqTable[i][j][val2idx] / (double)sumFreq;
+
+							util1[i] += issueGain1;
+							util2[i] += issueGain2;
+						}
+					}
+
 					double val1 = 0;
 					double val2 = 0;
 					for(int i = 0; i< totalEnemies; i++)
@@ -293,8 +318,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
 					val1 /= totalEnemies;
 					val2 /= totalEnemies;
 
-					double compFunc1 = Math.pow(myUtil1, 2) * Math.pow(val1, 2);
-					double compFunc2 = Math.pow(myUtil2, 2) * Math.pow(val2, 2);
+					double compFunc1 = Math.pow(myUtil1, 2) * Math.pow(val1, 1);
+					double compFunc2 = Math.pow(myUtil2, 2) * Math.pow(val2, 1);
 
 					return Double.compare(compFunc2, compFunc1);
 				} catch (Exception e) {
