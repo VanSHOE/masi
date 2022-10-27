@@ -355,14 +355,14 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 			// find bid with util greater or equal
 			Bid maxBid = allBids[0];
-			for (Bid allBid : allBids) {
-				if (getUtility(allBid) >= concederUtil) {
-					maxBid = allBid;
-				} else {
-//					maxBid = allBids[i - 1];
-					break;
-				}
-			}
+//			for (Bid allBid : allBids) {
+//				if (getUtility(allBid) >= concederUtil) {
+//					maxBid = allBid;
+//				} else {
+////					maxBid = allBids[i - 1];
+//					break;
+//				}
+//			}
 
 			System.out.println("Current bid: " + maxBid);
 			System.out.println("Current bid utility: " + getUtility(maxBid));
@@ -427,8 +427,10 @@ public class Group6_Agent extends AbstractNegotiationParty {
 		{
 			return;
 		}
+
 		Bid bid = null;
 		if (action instanceof Offer) {
+			lastReceivedBid = ((Offer) action).getBid();
 			bid = ((Offer) action).getBid();
 			if (Oppbids[agent2Index.get(sender)].size() > 0)
 			{
@@ -455,6 +457,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 			Oppbids[agent2Index.get(sender)].add(((Offer) action).getBid());
 		}
 		else {
+			lastReceivedBid = ((Accept) action).getBid();
 			bid = ((Accept) action).getBid();
 			if (Oppbids[agent2Index.get(sender)].size() > 0)
 			{
