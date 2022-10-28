@@ -7,6 +7,7 @@ import genius.core.actions.*;
 import genius.core.issue.*;
 import genius.core.parties.AbstractNegotiationParty;
 import genius.core.parties.NegotiationInfo;
+import genius.core.timeline.DiscreteTimeline;
 import genius.core.utility.AdditiveUtilitySpace;
 import genius.core.utility.Evaluator;
 import genius.core.utility.EvaluatorDiscrete;
@@ -21,7 +22,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
     private Bid[] allBids;
     // curPtr
     private int curPtr = 0;
-    private double d = 5;
+    private double d = 200;
     private int totalEnemies = -1;
     private int curParty = 0;
     private int[][] issueChanges;
@@ -179,8 +180,12 @@ public class Group6_Agent extends AbstractNegotiationParty {
 //	}
     @Override
     public Action chooseAction(List<Class<? extends Action>> validActions) {
-        System.out.println("Time left: " + getTimeLine().getTime());
+
+
         try {
+            System.out.println("Time left: " + getTimeLine().getTime());
+            DiscreteTimeline discreteTimeline = (DiscreteTimeline) timeline;
+            System.out.println("Current rounds left: " + discreteTimeline.getOwnRoundsLeft());
             double[][] hypoWeights = new double[totalEnemies][allIssues.size()];
             // fill
 
@@ -259,6 +264,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
                 stdDevs[i] = sum;
                 means[i] = sumMeans;
             }
+
+
             // niceness = means / (1 + stddev) + stddev / (1 + means), handle - divide by 0
             for (int i = 0; i < totalEnemies; i++) {
                 niceness[i] = means[i] / (1 + stdDevs[i]) + stdDevs[i] / (1 + means[i]);
@@ -318,12 +325,12 @@ public class Group6_Agent extends AbstractNegotiationParty {
             });
 
 
-            if (getUtility(lastReceivedBid) < 0.3) {
-                d += 0.5;
+            if (lastReceivedBid != null &&  getUtility(lastReceivedBid) < 0.5) {
+                d += 20;
 
-                if (d > 10) {
-                    d = 10;
-                }
+//                if (d > 10) {
+//                    d = 10;
+//                }
 
                 System.out.println("D: " + d);
             }
@@ -337,7 +344,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
             double p = getJustAcceptProb();
 
-            if (lastReceivedBid != null && (getUtility(lastReceivedBid) >= concederUtil || p * getUtility(lastReceivedBid) >= (1 - p) * concederUtil)) {
+            if ((lastReceivedBid != null && (getUtility(lastReceivedBid) >= concederUtil)) || discreteTimeline.getOwnRoundsLeft() == 0) { // || p * getUtility(lastReceivedBid) >= (1 - p) * concederUtil)) {
 //                System.out.println("Ending negotiation");
 //                return new EndNegotiation(getPartyId());
                 return new Accept(getPartyId(), lastReceivedBid); // If the last received bid is equal or better(not really possible but since this involves floating point arithmetic, even greater is fine) than the maximum possible bid, accept it
@@ -366,6 +373,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
     @Override
     public void receiveMessage(AgentID sender, Action action) {
+        // print
+        System.out.println("Received message from " + sender + " with action " + action);
         super.receiveMessage(sender, action);
         // print sender and action
         if (action instanceof Inform && totalEnemies == -1) {
@@ -431,7 +440,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
             }
             Oppbids[agent2Index.get(sender)].add(((Offer) action).getBid());
         } else {
-            lastReceivedBid = ((Accept) action).getBid();
+//            lastReceivedBid = ((Accept) action).getBid();
             bid = ((Accept) action).getBid();
             if (Oppbids[agent2Index.get(sender)].size() > 0) {
                 Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
