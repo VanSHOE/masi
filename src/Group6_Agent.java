@@ -150,36 +150,36 @@ public class Group6_Agent extends AbstractNegotiationParty {
             double[][] hypoWeights = new double[totalEnemies][allIssues.size()];
             // fill
 
-            for (int i = 0; i < totalEnemies; i++) {
-
-                int sumIss = 0;
-                for (int k = 0; k < allIssues.size(); k++) {
-                    sumIss += issueChanges[i][k];
-                }
-
-                if (sumIss == 0) {
-                    for (int j = 0; j < allIssues.size(); j++) {
-                        hypoWeights[i][j] = 1.0 / allIssues.size();
-                    }
-
-                    continue;
-                }
-
-                for (int j = 0; j < allIssues.size(); j++) {
-                    hypoWeights[i][j] = issueChanges[i][j] / (double) sumIss;
-                    hypoWeights[i][j] = 1 - hypoWeights[i][j];
-                }
-
-                // normalize
-                double sum = 0;
-                for (int j = 0; j < allIssues.size(); j++) {
-                    sum += hypoWeights[i][j];
-                }
-
-                for (int j = 0; j < allIssues.size(); j++) {
-                    hypoWeights[i][j] /= sum;
-                }
-            }
+//            for (int i = 0; i < totalEnemies; i++) {
+//
+//                int sumIss = 0;
+//                for (int k = 0; k < allIssues.size(); k++) {
+//                    sumIss += issueChanges[i][k];
+//                }
+//
+//                if (sumIss == 0) {
+//                    for (int j = 0; j < allIssues.size(); j++) {
+//                        hypoWeights[i][j] = 1.0 / allIssues.size();
+//                    }
+//
+//                    continue;
+//                }
+//
+//                for (int j = 0; j < allIssues.size(); j++) {
+//                    hypoWeights[i][j] = issueChanges[i][j] / (double) sumIss;
+//                    hypoWeights[i][j] = 1 - hypoWeights[i][j];
+//                }
+//
+//                // normalize
+//                double sum = 0;
+//                for (int j = 0; j < allIssues.size(); j++) {
+//                    sum += hypoWeights[i][j];
+//                }
+//
+//                for (int j = 0; j < allIssues.size(); j++) {
+//                    hypoWeights[i][j] /= sum;
+//                }
+//            }
 
             double[] stdDevs = new double[totalEnemies]; // std dev of freq table
             double[] means = new double[totalEnemies]; // mean of freq table
@@ -210,6 +210,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
                     }
                     stdDev /= sumAllFreq;
                     stdDev = Math.sqrt(stdDev);
+                    hypoWeights[i][j] = 1.0 / (1.0 + stdDev);
+//                    hypoWeights[i][j] = stdDev;
 
                     double valMean = 0;
                     for (int k = 0; k < ((IssueDiscrete) allIssues.get(j)).getNumberOfValues(); k++) {
@@ -220,6 +222,16 @@ public class Group6_Agent extends AbstractNegotiationParty {
                     sumMeans += valMean;
                     sum += stdDev;
                 }
+                // normalize hypoWeights[i]
+                double sumHypo = 0;
+                for (int j = 0; j < allIssues.size(); j++) {
+                    sumHypo += hypoWeights[i][j];
+                }
+
+                for (int j = 0; j < allIssues.size(); j++) {
+                    hypoWeights[i][j] /= sumHypo;
+                }
+
                 sum /= allIssues.size();
                 sumMeans /= allIssues.size();
                 stdDevs[i] = sum;
@@ -269,16 +281,17 @@ public class Group6_Agent extends AbstractNegotiationParty {
                     double val2 = 0;
                     int nicenessSum = 0;
 
+
                     for (int i = 0; i < totalEnemies; i++) {
-                        val1 += util1[i] * niceness[i];
-                        val2 += util2[i] * niceness[i];
-                        nicenessSum += niceness[i];
+                        val1 += util1[i] * (1 - niceness[i]);
+                        val2 += util2[i] * (1 - niceness[i]);
+                        nicenessSum += (1 - niceness[i]);
                     }
                     val1 /= nicenessSum;
                     val2 /= nicenessSum;
 
-                    double compFunc1 = Math.pow(myUtil1, 2) * Math.pow(val1, 1);
-                    double compFunc2 = Math.pow(myUtil2, 2) * Math.pow(val2, 1);
+                    double compFunc1 = (1 + Math.pow(myUtil1, 2)) * (1 + Math.pow(val1, 1));
+                    double compFunc2 = (1 + Math.pow(myUtil2, 2)) * (1 + Math.pow(val2, 1));
 
                     return Double.compare(compFunc2, compFunc1);
                 } catch (Exception e) {
