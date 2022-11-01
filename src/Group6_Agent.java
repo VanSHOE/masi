@@ -336,122 +336,130 @@ public class Group6_Agent extends AbstractNegotiationParty {
     @Override
     public void receiveMessage(AgentID sender, Action action) {
         // print
-        System.out.println("Received message from " + sender + " with action " + action);
-        super.receiveMessage(sender, action);
-        // print sender and action
-        if (action instanceof Inform && totalEnemies == -1) {
-            totalEnemies = (int) ((Inform) action).getValue() - 1;
+        try {
+            System.out.println("Received message from " + sender + " with action " + action);
+            super.receiveMessage(sender, action);
+            // print sender and action
+            if (action instanceof Inform && totalEnemies == -1) {
+                totalEnemies = (int) ((Inform) action).getValue() - 1;
 
-            freqTable = new int[totalEnemies][allIssues.size()][];
-            for (int i = 0; i < totalEnemies; i++) {
-                for (int j = 0; j < allIssues.size(); j++) {
-                    freqTable[i][j] = new int[((IssueDiscrete) allIssues.get(j)).getNumberOfValues()];
-                    Arrays.fill(freqTable[i][j], 0);
+                freqTable = new int[totalEnemies][allIssues.size()][];
+                for (int i = 0; i < totalEnemies; i++) {
+                    for (int j = 0; j < allIssues.size(); j++) {
+                        freqTable[i][j] = new int[((IssueDiscrete) allIssues.get(j)).getNumberOfValues()];
+                        Arrays.fill(freqTable[i][j], 0);
+                    }
+                }
+
+                // print
+                System.out.println("Total parties: " + totalEnemies);
+                System.out.println("Freq table: " + Arrays.deepToString(freqTable));
+                issueChanges = new int[totalEnemies][allIssues.size()];
+
+                for (int i = 0; i < totalEnemies; i++) {
+                    Arrays.fill(issueChanges[i], 0);
+                }
+
+                Oppbids = new LinkedList[totalEnemies];
+
+                for (int i = 0; i < totalEnemies; i++) {
+                    Oppbids[i] = new LinkedList<Bid>();
                 }
             }
+            if (sender != null) {
+                // check if it exists in hashmaps
+                if (!agent2Index.containsKey(sender)) {
+                    agent2Index.put(sender, agent2Index.size());
+                    index2Agent.put(index2Agent.size(), sender);
+                }
+            }
+            System.out.println("Current sender: " + sender + " Action: " + action);
 
-            // print
-            System.out.println("Total parties: " + totalEnemies);
-            System.out.println("Freq table: " + Arrays.deepToString(freqTable));
-            issueChanges = new int[totalEnemies][allIssues.size()];
-
-            for (int i = 0; i < totalEnemies; i++) {
-                Arrays.fill(issueChanges[i], 0);
+            if (!(action instanceof Offer) && !(action instanceof Accept)) {
+                System.out.println("receiveMessage end - a");
+                return;
             }
 
-            Oppbids = new LinkedList[totalEnemies];
+            Bid bid = null;
+            if (action instanceof Offer) {
+                lastReceivedBid = ((Offer) action).getBid();
+                bid = ((Offer) action).getBid();
+                if (Oppbids[agent2Index.get(sender)].size() > 0) {
+                    Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
+                    Bid curBid = ((Offer) action).getBid();
 
-            for (int i = 0; i < totalEnemies; i++) {
-                Oppbids[i] = new LinkedList<Bid>();
-            }
-        }
-        if (sender != null) {
-            // check if it exists in hashmaps
-            if (!agent2Index.containsKey(sender)) {
-                agent2Index.put(sender, agent2Index.size());
-                index2Agent.put(index2Agent.size(), sender);
-            }
-        }
-        System.out.println("Current sender: " + sender + " Action: " + action);
+                    // if not equal
+                    if (lastBid != null && !lastBid.equals(curBid)) {
+                        for (int i = 0; i < allIssues.size(); i++) {
+                            int s = allIssues.get(i).getNumber();
+                            Value lastVal = lastBid.getValue(s);
+                            Value curVal = curBid.getValue(s);
 
-        if (!(action instanceof Offer) && !(action instanceof Accept)) {
-            System.out.println("receiveMessage end - a");
-            return;
-        }
-
-        Bid bid = null;
-        if (action instanceof Offer) {
-            lastReceivedBid = ((Offer) action).getBid();
-            bid = ((Offer) action).getBid();
-            if (Oppbids[agent2Index.get(sender)].size() > 0) {
-                Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
-                Bid curBid = ((Offer) action).getBid();
-
-                // if not equal
-                if (lastBid != null && !lastBid.equals(curBid)) {
-                    for (int i = 0; i < allIssues.size(); i++) {
-                        int s = allIssues.get(i).getNumber();
-                        Value lastVal = lastBid.getValue(s);
-                        Value curVal = curBid.getValue(s);
-
-                        if (lastVal != curVal) {
-                            issueChanges[agent2Index.get(sender)][i]++;
+                            if (lastVal != curVal) {
+                                issueChanges[agent2Index.get(sender)][i]++;
+                            }
                         }
                     }
                 }
-            }
-            Oppbids[agent2Index.get(sender)].add(((Offer) action).getBid());
-        } else {
+                Oppbids[agent2Index.get(sender)].add(((Offer) action).getBid());
+            } else {
 //            lastReceivedBid = ((Accept) action).getBid();
-            bid = ((Accept) action).getBid();
-            if (Oppbids[agent2Index.get(sender)].size() > 0) {
-                Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
-                Bid curBid = ((Accept) action).getBid();
+                bid = ((Accept) action).getBid();
+                if (Oppbids[agent2Index.get(sender)].size() > 0) {
+                    Bid lastBid = Oppbids[agent2Index.get(sender)].peekLast();
+                    Bid curBid = ((Accept) action).getBid();
 
 
-                // if not equal
-                if (lastBid != null && !lastBid.equals(curBid)) {
-                    for (int i = 0; i < allIssues.size(); i++) {
-                        int s = allIssues.get(i).getNumber();
-                        Value lastVal = lastBid.getValue(s);
-                        Value curVal = curBid.getValue(s);
+                    // if not equal
+                    if (lastBid != null && !lastBid.equals(curBid)) {
+                        for (int i = 0; i < allIssues.size(); i++) {
+                            int s = allIssues.get(i).getNumber();
+                            Value lastVal = lastBid.getValue(s);
+                            Value curVal = curBid.getValue(s);
 
-                        if (lastVal != curVal) {
-                            issueChanges[agent2Index.get(sender)][i]++;
+                            if (lastVal != curVal) {
+                                issueChanges[agent2Index.get(sender)][i]++;
+                            }
                         }
                     }
                 }
+                Oppbids[agent2Index.get(sender)].add(((Accept) action).getBid());
             }
-            Oppbids[agent2Index.get(sender)].add(((Accept) action).getBid());
-        }
 
-        // update freq table
-        int SIdx = agent2Index.get(sender);
+            // update freq table
+            int SIdx = agent2Index.get(sender);
 
-        if (bid == null) {
-            System.out.println("receiveMessage end - b");
-            return;
-        }
+            if (bid == null) {
+                System.out.println("receiveMessage end - b");
+                return;
+            }
 
-        for (int i = 0; i < allIssues.size(); i++) {
-            IssueDiscrete issue = (IssueDiscrete) allIssues.get(i);
-            // TODO: We need to make our agent crash friendly with try except
-            ValueDiscrete valIdx = ((ValueDiscrete) bid.getValue(issue.getNumber()));
-            // search for idx in allissuesvalues
-            int idx = -1;
-            for (int j = 0; j < issue.getNumberOfValues(); j++) {
-                if (issue.getValue(j).equals(valIdx)) {
-                    idx = j;
-                    break;
+            for (int i = 0; i < allIssues.size(); i++) {
+                IssueDiscrete issue = (IssueDiscrete) allIssues.get(i);
+                // TODO: We need to make our agent crash friendly with try except
+                ValueDiscrete valIdx = ((ValueDiscrete) bid.getValue(issue.getNumber()));
+                // search for idx in allissuesvalues
+                int idx = -1;
+                for (int j = 0; j < issue.getNumberOfValues(); j++) {
+                    if (issue.getValue(j).equals(valIdx)) {
+                        idx = j;
+                        break;
+                    }
+                }
+
+                if (idx >= 0 && idx < issue.getNumberOfValues()) {
+                    freqTable[SIdx][i][idx]++;
                 }
             }
 
-            if (idx >= 0 && idx < issue.getNumberOfValues()) {
-                freqTable[SIdx][i][idx]++;
-            }
-        }
+            System.out.println("receiveMessage end - c");
 
-        System.out.println("receiveMessage end - c");
+        } catch (Exception e) {
+
+            // error
+            System.out.println("receiveMessage end - Something went wrong");
+//            e.printStackTrace();
+        }
 
     }
 
