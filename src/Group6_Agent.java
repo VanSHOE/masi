@@ -228,7 +228,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 
             for (int i = 0; i < totalEnemies; i++) {
-                niceness[i] = 3 * means[i] / (1 + stdDevs[i]) + stdDevs[i] / (1 + means[i]);
+                niceness[i] = 10 * means[i] / (1 + stdDevs[i]) + stdDevs[i] / (1 + means[i]);
             }
 
             // TODO: Think on what to do after this. Like use the niceness and weights etc. to find some ordering of bids (sort the all bids array)
