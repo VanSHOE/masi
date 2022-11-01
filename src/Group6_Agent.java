@@ -290,8 +290,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
                     val1 /= nicenessSum;
                     val2 /= nicenessSum;
 
-                    double compFunc1 = (1 + Math.pow(myUtil1, 2)) * (1 + Math.pow(val1, 1));
-                    double compFunc2 = (1 + Math.pow(myUtil2, 2)) * (1 + Math.pow(val2, 1));
+                    double compFunc1 = (1 + Math.pow(myUtil1, 3)) * (1 + Math.pow(val1, 1));
+                    double compFunc2 = (1 + Math.pow(myUtil2, 3)) * (1 + Math.pow(val2, 1));
 
                     return Double.compare(compFunc2, compFunc1);
                 } catch (Exception e) {
