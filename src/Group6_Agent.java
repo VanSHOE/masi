@@ -90,16 +90,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
         // print length of bids
         System.out.println("Length of bids: " + allBids.length);
-//		System.exit(0);
-        // sort on utility
-        Arrays.sort(allBids, (Bid b1, Bid b2) -> {
-            try {
-                return Double.compare(info.getUtilitySpace().getUtility(b2), info.getUtilitySpace().getUtility(b1));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return 0;
-        });
+//		System.exit(0)
 
         Map<Objective, Evaluator> eval = ((AdditiveUtilitySpace) utilitySpace).getfEvaluators();
         // print all keys
@@ -120,31 +111,13 @@ public class Group6_Agent extends AbstractNegotiationParty {
         System.out.println("Eval: " + eval);
 
         // TODO: find reservation value
-		reservationValue = 0;
-		try {
-			reservationValue = info.getUtilitySpace().getReservationValue();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("Reservation value: " + reservationValue);
-
-//		// find the bid with the reservation value and set cratio
-//		for (int j = 0; j < allBids.length; j++) {
-//			try {
-//				// print each bid
-////				System.out.println("Bid: " + allBids[j] + " Utility: " + info.getUtilitySpace().getUtility(allBids[j]));
-//				if (info.getUtilitySpace().getUtility(allBids[j]) <= reservationValue) {
-//					cRation = j / (double)allBids.length;
-//					break;
-//				}
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//
-//		System.out.println("Cratio: " + cRation);
-
-
+        reservationValue = 0;
+        try {
+            reservationValue = info.getUtilitySpace().getReservationValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("Reservation value: " + reservationValue);
     }
 
 
@@ -278,8 +251,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
             Arrays.sort(allBids, (Bid b1, Bid b2) -> {
                 try {
-                    double myUtil1 = cInfo.getUtilitySpace().getUtility(b1);
-                    double myUtil2 = cInfo.getUtilitySpace().getUtility(b2);
+                    double myUtil1 = cInfo.getUtilitySpace().getUtilityWithDiscount(b1, timeline);
+                    double myUtil2 = cInfo.getUtilitySpace().getUtilityWithDiscount(b2, timeline);
                     double[] util1 = new double[totalEnemies];
                     double[] util2 = new double[totalEnemies];
 
@@ -310,12 +283,15 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
                     double val1 = 0;
                     double val2 = 0;
+                    int nicenessSum = 0;
+
                     for (int i = 0; i < totalEnemies; i++) {
                         val1 += util1[i] * niceness[i];
                         val2 += util2[i] * niceness[i];
+                        nicenessSum += niceness[i];
                     }
-                    val1 /= totalEnemies;
-                    val2 /= totalEnemies;
+                    val1 /= nicenessSum;
+                    val2 /= nicenessSum;
 
                     double compFunc1 = Math.pow(myUtil1, 2) * Math.pow(val1, 1);
                     double compFunc2 = Math.pow(myUtil2, 2) * Math.pow(val2, 1);
@@ -328,7 +304,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
             });
 
 
-            if (lastReceivedBid != null &&  getUtility(lastReceivedBid) < 0.5) {
+            if (lastReceivedBid != null && cInfo.getUtilitySpace().getUtilityWithDiscount(lastReceivedBid, timeline) < 0.5) {
                 d += 20;
 
 //                if (d > 10) {
@@ -347,7 +323,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
             double p = getJustAcceptProb();
 
-            if ((lastReceivedBid != null && (getUtility(lastReceivedBid) >= concederUtil)) || discreteTimeline.getOwnRoundsLeft() == 0) {
+            if ((lastReceivedBid != null && (cInfo.getUtilitySpace().getUtilityWithDiscount(lastReceivedBid, timeline) >= concederUtil)) || discreteTimeline.getOwnRoundsLeft() == 0) {
 //                System.out.println("Ending negotiation");
 //                return new EndNegotiation(getPartyId());
                 return new Accept(getPartyId(), lastReceivedBid); // If the last received bid is equal or better(not really possible but since this involves floating point arithmetic, even greater is fine) than the maximum possible bid, accept it
@@ -355,17 +331,9 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
             // find bid with util greater or equal
             Bid maxBid = allBids[0];
-//			for (Bid allBid : allBids) {
-//				if (getUtility(allBid) >= concederUtil) {
-//					maxBid = allBid;
-//				} else {
-////					maxBid = allBids[i - 1];
-//					break;
-//				}
-//			}
 
             System.out.println("Current bid: " + maxBid);
-            System.out.println("Current bid utility: " + getUtility(maxBid));
+            System.out.println("Current bid utility: " + cInfo.getUtilitySpace().getUtilityWithDiscount(maxBid, timeline));
             return new Offer(getPartyId(), maxBid); // If the last received bid is not equal or better than the maximum possible bid, offer the maximum possible bid
         } catch (Exception e) {
             e.printStackTrace();
