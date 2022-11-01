@@ -22,7 +22,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
     private Bid[] allBids;
     // curPtr
     private int curPtr = 0;
-    private double d = 200;
+    private double d = 47;
     private int totalEnemies = -1;
     private int curParty = 0;
     private int[][] issueChanges;
@@ -289,7 +289,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
 
             if (lastReceivedBid != null && cInfo.getUtilitySpace().getUtilityWithDiscount(lastReceivedBid, timeline) < 0.5) {
-                d += 20;
+                d += 0.5;
                 System.out.println("D: " + d);
             }
 
