@@ -139,21 +139,6 @@ public class Group6_Agent extends AbstractNegotiationParty {
         return 0.8 * (Math.exp(d * curTime) - 1) / (Math.exp(d) - 1);
     }
 
-    //	public double stdDev(Arrays arr, int len) {
-//		double sum = 0.0, standardDeviation = 0.0;
-//
-//		for(double num : arr) {
-//			sum += num;
-//		}
-//
-//		double mean = sum/ len;
-//
-//		for(double num: arr) {
-//			standardDeviation += Math.pow(num - mean, 2);
-//		}
-//
-//		return Math.sqrt(standardDeviation/ len);
-//	}
     @Override
     public Action chooseAction(List<Class<? extends Action>> validActions) {
 
@@ -204,7 +189,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
                 double sum = 0;
                 double sumMeans = 0;
                 for (int j = 0; j < allIssues.size(); j++) {
-                    Integer sumAllFreq = 0;
+                    int sumAllFreq = 0;
                     for (int k = 0; k < ((IssueDiscrete) allIssues.get(j)).getNumberOfValues(); k++) {
                         sumAllFreq += freqTable[i][j][k];
                     }
@@ -306,11 +291,6 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
             if (lastReceivedBid != null && cInfo.getUtilitySpace().getUtilityWithDiscount(lastReceivedBid, timeline) < 0.5) {
                 d += 20;
-
-//                if (d > 10) {
-//                    d = 10;
-//                }
-
                 System.out.println("D: " + d);
             }
 
@@ -329,7 +309,6 @@ public class Group6_Agent extends AbstractNegotiationParty {
                 return new Accept(getPartyId(), lastReceivedBid); // If the last received bid is equal or better(not really possible but since this involves floating point arithmetic, even greater is fine) than the maximum possible bid, accept it
             }
 
-            // find bid with util greater or equal
             Bid maxBid = allBids[0];
 
             System.out.println("Current bid: " + maxBid);
