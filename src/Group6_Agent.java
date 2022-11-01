@@ -34,6 +34,8 @@ public class Group6_Agent extends AbstractNegotiationParty {
     ValueDiscrete[][] allIssueValues;
     NegotiationInfo cInfo;
 
+    double reservationValue;
+
     @Override
     public void init(NegotiationInfo info) {
         super.init(info);
@@ -118,14 +120,14 @@ public class Group6_Agent extends AbstractNegotiationParty {
         System.out.println("Eval: " + eval);
 
         // TODO: find reservation value
-//		double reservationValue = 0;
-//		try {
-//			reservationValue = info.getUtilitySpace().getReservationValue();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println("Reservation value: " + reservationValue);
-//
+		reservationValue = 0;
+		try {
+			reservationValue = info.getUtilitySpace().getReservationValue();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Reservation value: " + reservationValue);
+
 //		// find the bid with the reservation value and set cratio
 //		for (int j = 0; j < allBids.length; j++) {
 //			try {
@@ -150,8 +152,9 @@ public class Group6_Agent extends AbstractNegotiationParty {
         // get curTime
         double curTime = timeline.getTime();
         // func is 1 - tan(t*arctan(d))/d
-        return 1 - Math.tan(curTime * Math.atan(d)) / d;
-//		return 1 - curTime * d + 1;
+        double val2Ret = 1 - Math.tan(curTime * Math.atan(d)) / d;
+        // max of reservation value
+        return Math.max(val2Ret, reservationValue);
     }
 
     public double getJustAcceptProb() {
@@ -344,7 +347,7 @@ public class Group6_Agent extends AbstractNegotiationParty {
 
             double p = getJustAcceptProb();
 
-            if ((lastReceivedBid != null && (getUtility(lastReceivedBid) >= concederUtil)) || discreteTimeline.getOwnRoundsLeft() == 0) { // || p * getUtility(lastReceivedBid) >= (1 - p) * concederUtil)) {
+            if ((lastReceivedBid != null && (getUtility(lastReceivedBid) >= concederUtil)) || discreteTimeline.getOwnRoundsLeft() == 0) {
 //                System.out.println("Ending negotiation");
 //                return new EndNegotiation(getPartyId());
                 return new Accept(getPartyId(), lastReceivedBid); // If the last received bid is equal or better(not really possible but since this involves floating point arithmetic, even greater is fine) than the maximum possible bid, accept it
